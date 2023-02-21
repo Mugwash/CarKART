@@ -8,26 +8,31 @@ public class CarController : MonoBehaviour
     public GameObject rRight;
     public GameObject rLeft;
     public GameObject carBody;
+    [HideInInspector]
     public GameObject frontRightPos;
+    [HideInInspector]
     public GameObject frontLeftPos;
+    [HideInInspector]
     public GameObject rearRightPos;
+    [HideInInspector]
     public GameObject rearLeftPos;
     public float topSpeed;
     private Rigidbody _carBodyRb;
-    private float _fMoveInput;
     private float _sMoveInput;
     public GameObject[] tires;
     public float groundDamping;
     public float aeroDamping;
     public float driftDamping = 0.01f;
-    private InputAction m_Accelerate;
-    private InputAction m_Brake;
-    private float speedInput;
+    private InputAction _mAccelerate;
+    private InputAction _mBrake;
+    private float _speedInput;
+    public float numberOfRotations;
+    [SerializeField] private AnimationCurve accelerationCurve;
 
     // Start is called before the first frame update
     void Start()
     {
-        inputSetup();
+        InputSetup();
         _carBodyRb = carBody.GetComponent<Rigidbody>();
         CreateObject(fLeft,carBody,"frontLeftPos");
         CreateObject(fRight,carBody,"frontRightPos");
@@ -40,10 +45,10 @@ public class CarController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        speedInput = m_Accelerate.ReadValue<float>() - m_Brake.ReadValue<float>();
+        _speedInput = _mAccelerate.ReadValue<float>() - _mBrake.ReadValue<float>();
         CarRotation();
         CarPosition();
-        _fMoveInput = Input.GetAxis("Vertical");
+        Input.GetAxis("Vertical");
         _sMoveInput = Input.GetAxis("Horizontal");
         var carRotation = carBody.transform.rotation;
         rRight.transform.rotation = new Quaternion(carRotation.x, carRotation.y, carRotation.z, carRotation.w);
@@ -60,8 +65,8 @@ public class CarController : MonoBehaviour
     {
         Movement();
         Physics.SyncTransforms();
+        Debug.Log(GetCurrentSpeed(carBody));
 
-        
     }
 
     void DisableCollisionWith(GameObject obj1, GameObject obj2, GameObject obj3, GameObject obj4,
@@ -77,13 +82,13 @@ public class CarController : MonoBehaviour
         }
     }
 
-    private bool IsTouchingGround(GameObject gameObject,float dst)
+    private bool IsTouchingGround(GameObject obj,float dst)
     {
         // Get the collider component of the game object
-        Collider component = gameObject.GetComponent<Collider>();
+        Collider component = obj.GetComponent<Collider>();
         // Create a ray that starts at the center of the collider and points downward
         Vector3 rayOrigin = component.bounds.center;
-        Vector3 rayDirection = -gameObject.transform.up;
+        Vector3 rayDirection = -obj.transform.up;
         // Create a RaycastHit variable to store the hit information
         Ray ray = new Ray(rayOrigin,rayDirection);
         //Debug.DrawRay(rayOrigin, rayDirection*dst,Color.green);
@@ -101,26 +106,28 @@ public class CarController : MonoBehaviour
 
     public void Accelerate()
     {
-        Debug.Log(speedInput);
+        Debug.Log(_speedInput);
 
     }
 
     void Movement()
     {
-        var damping = 0f;
+        float damping;
         var transformPosition = fLeft.transform.position+fRight.transform.position;
         var forwardDir = transformPosition - (rRight.transform.position+rLeft.transform.position);
         //Debug.Log(accelerateValue);
-
         if (IsTouchingGround(carBody, 1f))
         {
-            _carBodyRb.AddForce( forwardDir *(speedInput * topSpeed) , ForceMode.Acceleration);
+            float accelerationAmount = accelerationCurve.Evaluate(Time.time);
+            float currentSpeed = _speedInput * topSpeed;
+            Vector3 force = forwardDir * (currentSpeed * accelerationAmount);
+            _carBodyRb.AddForce( force , ForceMode.Acceleration);
             damping = groundDamping;
         }
         else
         {
             var carForward = new Vector3(forwardDir.x, 0, forwardDir.z);
-            _carBodyRb.AddForce(carForward * (speedInput * topSpeed), ForceMode.Acceleration);
+            _carBodyRb.AddForce(carForward * (_speedInput * topSpeed), ForceMode.Acceleration);
             damping = aeroDamping;
         }
         
@@ -131,7 +138,7 @@ public class CarController : MonoBehaviour
 
     void CarRotation()
     {
-        var step = 70.0f * Time.deltaTime;
+        var step = numberOfRotations * Time.deltaTime;
         var avgUpDir = (GroundUpDir(fLeft,1f) + GroundUpDir(fRight,1f)+GroundUpDir(rRight,1f)+GroundUpDir(rLeft,1f)) / 4f;
         _carBodyRb.transform.rotation = Quaternion.RotateTowards(carBody.transform.rotation, Quaternion.LookRotation((fRight.transform.position+fLeft.transform.position) - (rRight.transform.position+rLeft.transform.position), avgUpDir), step);
 
@@ -146,7 +153,8 @@ public class CarController : MonoBehaviour
     void CarPosition()
     {
         var position = carBody.transform.position;
-        position=new Vector3(position.x, GetYValue(carBody, 0.8f), position.z);
+        position=new Vector3(position.x, GetYValue(carBody, 0.7f), position.z);
+        //Debug.DrawRay(carBody.transform.position,-carBody.transform.up,Color.red,0.8f);
         carBody.transform.position = position;
     }
 
@@ -165,30 +173,30 @@ public class CarController : MonoBehaviour
         return temp;
     }
 
-    private Vector3 GroundUpDir(GameObject gameObject, float maxDST)
+    private Vector3 GroundUpDir(GameObject obj, float maxDst)
     {
-        Collider component = gameObject.GetComponent<Collider>();
+        Collider component = obj.GetComponent<Collider>();
 
         // Create a ray that starts at the center of the collider and points downward
         Vector3 rayOrigin = component.bounds.center;
-        Vector3 rayDirection = -gameObject.transform.up;
+        Vector3 rayDirection = -obj.transform.up;
         // Create a RaycastHit variable to store the hit information
         Ray ray = new Ray(rayOrigin, rayDirection);
 
         // Check if the collider is hitting anything below it
-        bool isHit = Physics.Raycast(ray, out _, maxDST);
+        bool isHit = Physics.Raycast(ray, out _, maxDst);
         if (isHit)
         {
-            Debug.DrawRay(gameObject.transform.position, GetRaycastDirection(gameObject)*5f, Color.yellow);
-            return GetRaycastDirection(gameObject);
+            Debug.DrawRay(obj.transform.position, GetRaycastDirection(obj)*5f, Color.yellow);
+            return GetRaycastDirection(obj);
         }
-        Debug.DrawRay(gameObject.transform.position, Vector3.up*5f, Color.yellow);
+        Debug.DrawRay(obj.transform.position, Vector3.up*5f, Color.yellow);
         return Vector3.up/10f;
     }    
-    private Vector3 GetRaycastDirection(GameObject gameObject)
+    private Vector3 GetRaycastDirection(GameObject obj)
          {
              // Create a ray that starts at the gameObject's position and points downward
-             Ray ray = new Ray(gameObject.transform.position, -gameObject.transform.up);
+             Ray ray = new Ray(obj.transform.position, -obj.transform.up);
      
              // Set up the raycast hit variable
 
@@ -206,12 +214,12 @@ public class CarController : MonoBehaviour
              return -Vector3.up;
          }
     
-    private Vector3 GetForwardDirection(GameObject gameObject)
+    private Vector3 GetForwardDirection(GameObject obj)
     {
-        Ray ray = new Ray(gameObject.transform.position, -Vector3.up);
+        Ray ray = new Ray(obj.transform.position, -Vector3.up);
         if (Physics.Raycast(ray, out var hit))
         {
-            Vector3 forwardDirection = Vector3.Cross(hit.normal, -gameObject.transform.right).normalized;
+            Vector3 forwardDirection = Vector3.Cross(hit.normal, -obj.transform.right).normalized;
             return forwardDirection;
         }
 
@@ -231,13 +239,27 @@ public class CarController : MonoBehaviour
         newGameObject.transform.SetParent(parentObject.transform);
         GetType().GetField(objName).SetValue(this, newGameObject);
     }
-    public void inputSetup()
+
+    private void InputSetup()
     {
-        m_Accelerate = new InputAction("accelerate");
-        m_Brake = new InputAction("brake");
-        m_Accelerate.AddBinding("<Gamepad>/rightTrigger");
-        m_Brake.AddBinding("<Gamepad>/leftTrigger");
-        m_Accelerate.Enable();
-        m_Brake.Enable();
+        _mAccelerate = new InputAction("accelerate");
+        _mBrake = new InputAction("brake");
+        _mAccelerate.AddBinding("<Gamepad>/rightTrigger");
+        _mBrake.AddBinding("<Gamepad>/leftTrigger");
+        _mAccelerate.Enable();
+        _mBrake.Enable();
+    }
+
+    private float GetCurrentSpeed(GameObject objectToCheck)
+    {
+        Rigidbody objectRigidbody = objectToCheck.GetComponent<Rigidbody>();
+
+        if (objectRigidbody == null)
+        {
+            Debug.LogError("GameObject does not have a Rigidbody component.");
+            return 0f;
+        }
+
+        return objectRigidbody.velocity.magnitude;
     }
 }

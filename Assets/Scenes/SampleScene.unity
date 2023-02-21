@@ -736,6 +736,30 @@ PrefabInstance:
       propertyPath: groundDamping
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1492024963029791109, guid: 133308cdb8794744caaef026bde9e1f0, type: 3}
+      propertyPath: numberOfRotations
+      value: 70
+      objectReference: {fileID: 0}
+    - target: {fileID: 1492024963029791109, guid: 133308cdb8794744caaef026bde9e1f0, type: 3}
+      propertyPath: accelerationCurve.m_Curve.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1492024963029791109, guid: 133308cdb8794744caaef026bde9e1f0, type: 3}
+      propertyPath: accelerationCurve.m_Curve.Array.data[1].time
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1492024963029791109, guid: 133308cdb8794744caaef026bde9e1f0, type: 3}
+      propertyPath: accelerationCurve.m_Curve.Array.data[1].value
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1492024963029791109, guid: 133308cdb8794744caaef026bde9e1f0, type: 3}
+      propertyPath: accelerationCurve.m_Curve.Array.data[0].inSlope
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1492024963029791109, guid: 133308cdb8794744caaef026bde9e1f0, type: 3}
+      propertyPath: accelerationCurve.m_Curve.Array.data[0].outSlope
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 2314015520912734520, guid: 133308cdb8794744caaef026bde9e1f0, type: 3}
       propertyPath: m_Drag
       value: 0
