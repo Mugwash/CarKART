@@ -27,6 +27,7 @@ public class CarController : MonoBehaviour
     private InputAction _mBrake;
     private float _speedInput;
     public float numberOfRotations;
+    private float _chasisTireDst;
     [SerializeField] private AnimationCurve accelerationCurve;
 
     // Start is called before the first frame update
@@ -40,6 +41,7 @@ public class CarController : MonoBehaviour
         CreateObject(rRight,carBody,"rearRightPos");
         DisableCollisionWith(fLeft, fRight, rLeft, rRight, carBody);
         tires = new[] { fLeft, fRight, rLeft, rRight };
+        _chasisTireDst = GetDstChasisTire(carBody, fLeft);
     }
 
     // Update is called once per frame
@@ -65,7 +67,6 @@ public class CarController : MonoBehaviour
     {
         Movement();
         Physics.SyncTransforms();
-        Debug.Log(GetCurrentSpeed(carBody));
 
     }
 
@@ -153,7 +154,7 @@ public class CarController : MonoBehaviour
     void CarPosition()
     {
         var position = carBody.transform.position;
-        position=new Vector3(position.x, GetYValue(carBody, 0.7f), position.z);
+        position=new Vector3(position.x, GetYValue(carBody, _chasisTireDst), position.z);
         //Debug.DrawRay(carBody.transform.position,-carBody.transform.up,Color.red,0.8f);
         carBody.transform.position = position;
     }
@@ -261,5 +262,13 @@ public class CarController : MonoBehaviour
         }
 
         return objectRigidbody.velocity.magnitude;
+    }
+
+    static float GetDstChasisTire(GameObject obj1, GameObject obj2)
+    {
+         var collider1 = obj1.GetComponent<Collider>();
+         var collider2 = obj2.GetComponent<Collider>();
+         
+        return collider1.bounds.center.y - collider2.bounds.min.y;
     }
 }
