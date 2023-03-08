@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -28,6 +29,8 @@ public class CarController : MonoBehaviour
     private float _speedInput;
     public float numberOfRotations;
     private float _chasisTireDst;
+    [SerializeField]
+    private float steeringSpeed;
     [SerializeField] private AnimationCurve accelerationCurve;
 
     // Start is called before the first frame update
@@ -57,6 +60,8 @@ public class CarController : MonoBehaviour
         rLeft.transform.rotation = new Quaternion(carRotation.x, carRotation.y, carRotation.z, carRotation.w);
         fRight.transform.rotation = new Quaternion(carRotation.x, carRotation.y, carRotation.z, carRotation.w);
         fLeft.transform.rotation = new Quaternion(carRotation.x, carRotation.y, carRotation.z, carRotation.w);
+        RotateWheel(fLeft,_sMoveInput,50f,100f);
+        RotateWheel(fRight,_sMoveInput,50f,100f);
         TirePosition(fRight,frontRightPos);
         TirePosition(fLeft,frontLeftPos);
         TirePosition(rRight,rearRightPos);
@@ -65,6 +70,7 @@ public class CarController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        
         Movement();
         Physics.SyncTransforms();
 
@@ -103,12 +109,7 @@ public class CarController : MonoBehaviour
     {
         var position = tirePos.transform.position;
         tire.transform.position =new Vector3(position.x,Mathf.Clamp(tire.transform.position.y,position.y-0.1f,position.y+0.1f),position.z);
-    }
-
-    public void Accelerate()
-    {
-        Debug.Log(_speedInput);
-
+        
     }
 
     void Movement()
@@ -145,7 +146,10 @@ public class CarController : MonoBehaviour
 
         if (IsTouchingGround(fLeft,1f)&&IsTouchingGround(fRight,1f))
         {
-            carBody.transform.Rotate(0,_sMoveInput*100f*Time.deltaTime,0,Space.Self);
+            Quaternion startRotation = carBody.transform.rotation;
+            Quaternion targetRotation = Quaternion.Euler(0, _sMoveInput * 100f, 0) * startRotation;
+            carBody.transform.rotation = Quaternion.Lerp(startRotation, targetRotation, Time.deltaTime);
+
         }
     }
 
@@ -154,7 +158,7 @@ public class CarController : MonoBehaviour
     void CarPosition()
     {
         var position = carBody.transform.position;
-        position=new Vector3(position.x, GetYValue(carBody, _chasisTireDst), position.z);
+        position=new Vector3(position.x, GetYValue(carBody, _chasisTireDst+0.1f), position.z);
         //Debug.DrawRay(carBody.transform.position,-carBody.transform.up,Color.red,0.8f);
         carBody.transform.position = position;
     }
@@ -214,19 +218,7 @@ public class CarController : MonoBehaviour
              // If the raycast did not hit a collider, return Vector3.zero
              return -Vector3.up;
          }
-    
-    private Vector3 GetForwardDirection(GameObject obj)
-    {
-        Ray ray = new Ray(obj.transform.position, -Vector3.up);
-        if (Physics.Raycast(ray, out var hit))
-        {
-            Vector3 forwardDirection = Vector3.Cross(hit.normal, -obj.transform.right).normalized;
-            return forwardDirection;
-        }
 
-        return Vector3.zero;
-    }
-    
     private void CreateObject(GameObject positionObject, GameObject parentObject, string objName)
     {
         GameObject newGameObject = new GameObject
@@ -251,19 +243,6 @@ public class CarController : MonoBehaviour
         _mBrake.Enable();
     }
 
-    private float GetCurrentSpeed(GameObject objectToCheck)
-    {
-        Rigidbody objectRigidbody = objectToCheck.GetComponent<Rigidbody>();
-
-        if (objectRigidbody == null)
-        {
-            Debug.LogError("GameObject does not have a Rigidbody component.");
-            return 0f;
-        }
-
-        return objectRigidbody.velocity.magnitude;
-    }
-
     static float GetDstChasisTire(GameObject obj1, GameObject obj2)
     {
          var collider1 = obj1.GetComponent<Collider>();
@@ -271,4 +250,30 @@ public class CarController : MonoBehaviour
          
         return collider1.bounds.center.y - collider2.bounds.min.y;
     }
+    
+    float CalculateSpeedUsingRaycast(Vector3 origin, Vector3 direction)
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(origin, direction, out hit))
+        {
+            return hit.distance / Time.deltaTime;
+        }
+        return 0f;
+    }
+    
+    public void RotateWheel(GameObject wheelObject, float steeringInput, float maxWheelAngle, float maxWheelRotationSpeed) {
+        // Get the current rotation of the car body
+        Quaternion currentRotation = carBody.transform.rotation;
+
+        // Calculate the desired rotation based on the steering input
+        Quaternion desiredRotation = Quaternion.Euler(0f, steeringInput * maxWheelAngle, 0f) * currentRotation;
+
+        // Calculate the rotation speed based on the steering input
+        float rotationSpeed = maxWheelRotationSpeed * Mathf.Abs(steeringInput);
+
+        // Rotate the wheel towards the desired rotation
+        wheelObject.transform.rotation = Quaternion.RotateTowards(wheelObject.transform.rotation, desiredRotation, rotationSpeed);
+    }
+
+
 }

@@ -342,6 +342,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 43678520060fa5e42add8825ab61da06, type: 3}
+--- !u!4 &662611381 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2792218741957914664, guid: 133308cdb8794744caaef026bde9e1f0, type: 3}
+  m_PrefabInstance: {fileID: 1502109131}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -585,8 +590,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1943251117}
-  m_RootOrder: 1
+  m_Father: {fileID: 662611381}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &963194229
 MonoBehaviour:
@@ -748,11 +753,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1492024963029791109, guid: 133308cdb8794744caaef026bde9e1f0, type: 3}
       propertyPath: aeroDamping
-      value: 0.2
+      value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 1492024963029791109, guid: 133308cdb8794744caaef026bde9e1f0, type: 3}
       propertyPath: groundDamping
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1492024963029791109, guid: 133308cdb8794744caaef026bde9e1f0, type: 3}
+      propertyPath: steeringSpeed
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 1492024963029791109, guid: 133308cdb8794744caaef026bde9e1f0, type: 3}
       propertyPath: numberOfRotations
@@ -908,7 +917,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8401517277872012974, guid: 133308cdb8794744caaef026bde9e1f0, type: 3}
       propertyPath: m_Constraints
-      value: 122
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8401517277872012974, guid: 133308cdb8794744caaef026bde9e1f0, type: 3}
       propertyPath: m_CollisionDetection
