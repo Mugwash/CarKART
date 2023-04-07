@@ -1,3 +1,5 @@
+using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -23,17 +25,18 @@ public class CarController : MonoBehaviour
     public float groundDamping;
     public float aeroDamping;
     public float driftDamping = 0.01f;
-    private InputAction _mAccelerate;
+    private float _mAccelerate = 0;
     private InputAction _mBrake;
     private float _speedInput;
     public float numberOfRotations;
     private float _chasisTireDst;
     [SerializeField] private AnimationCurve accelerationCurve;
+    private CustomInput _input = null;
+    private Vector2 moveVector = Vector2.zero;
 
     // Start is called before the first frame update
     void Start()
     {
-        InputSetup();
         _carBodyRb = carBody.GetComponent<Rigidbody>();
         CreateObject(fLeft,carBody,"frontLeftPos");
         CreateObject(fRight,carBody,"frontRightPos");
@@ -44,15 +47,56 @@ public class CarController : MonoBehaviour
         _chasisTireDst = GetDstChasisTire(carBody, fLeft);
     }
 
+    private void Awake()
+    {
+        _input = new CustomInput();
+    }
+
+    private void OnEnable()
+    {
+        _input.Enable();
+        _input.Player.Movement.performed += OnMovementPerformed;
+        _input.Player.Movement.canceled += OnMovementCancelled;
+        _input.Player.Acceleration.performed += OnAccelerationPerformed;
+        _input.Player.Acceleration.canceled += OnAccelerationCancelled;
+    }
+
+    private void OnDisable()
+    {
+        _input.Disable();
+        _input.Player.Movement.performed -= OnMovementPerformed;
+        _input.Player.Movement.canceled -= OnMovementCancelled;
+        _input.Player.Acceleration.performed -= OnAccelerationPerformed;
+        _input.Player.Acceleration.canceled -= OnAccelerationCancelled;
+    }
+
+    private void OnMovementPerformed(InputAction.CallbackContext value)
+    {
+        moveVector = value.ReadValue<Vector2>();
+    }
+    
+    private void OnMovementCancelled(InputAction.CallbackContext value)
+    {
+        moveVector = Vector2.zero;
+    }
+    private void OnAccelerationPerformed(InputAction.CallbackContext value)
+    {
+        _speedInput = value.ReadValue<float>();
+    }
+    
+    private void OnAccelerationCancelled(InputAction.CallbackContext value)
+    {
+        _speedInput = 0;
+    }
+
     // Update is called once per frame
     void Update()
     {
-        _speedInput = _mAccelerate.ReadValue<float>() - _mBrake.ReadValue<float>();
-        CarRotation();
         CarPosition();
-        Input.GetAxis("Vertical");
-        _sMoveInput = Input.GetAxis("Horizontal");
+        CarRotation();
         var carRotation = carBody.transform.rotation;
+        Debug.Log(_speedInput);
+        _sMoveInput = moveVector.x;
         rRight.transform.rotation = new Quaternion(carRotation.x, carRotation.y, carRotation.z, carRotation.w);
         rLeft.transform.rotation = new Quaternion(carRotation.x, carRotation.y, carRotation.z, carRotation.w);
         fRight.transform.rotation = new Quaternion(carRotation.x, carRotation.y, carRotation.z, carRotation.w);
@@ -67,16 +111,14 @@ public class CarController : MonoBehaviour
         TirePosition(fLeft,frontLeftPos);
         TirePosition(rRight,rearRightPos);
         TirePosition(rLeft,rearLeftPos);
+        
     }
 
     private void FixedUpdate()
     {
-        
         Movement();
         Physics.SyncTransforms();
-
     }
-
     void DisableCollisionWith(GameObject obj1, GameObject obj2, GameObject obj3, GameObject obj4,
         GameObject ignoreCollider)
     {
@@ -234,16 +276,6 @@ public class CarController : MonoBehaviour
         GetType().GetField(objName).SetValue(this, newGameObject);
     }
 
-    private void InputSetup()
-    {
-        _mAccelerate = new InputAction("accelerate");
-        _mBrake = new InputAction("brake");
-        _mAccelerate.AddBinding("<Gamepad>/rightTrigger");
-        _mBrake.AddBinding("<Gamepad>/leftTrigger");
-        _mAccelerate.Enable();
-        _mBrake.Enable();
-    }
-
     static float GetDstChasisTire(GameObject obj1, GameObject obj2)
     {
          var collider1 = obj1.GetComponent<Collider>();
@@ -276,7 +308,6 @@ public class CarController : MonoBehaviour
     private float GetVelocity(GameObject obj)
     {
         float velocityInDirection = Vector3.Dot(obj.GetComponent<Rigidbody>().velocity, carBody.transform.forward);
-        Debug.Log(velocityInDirection);
         return velocityInDirection;
     }
 
@@ -285,7 +316,6 @@ public class CarController : MonoBehaviour
 
         // Calculate the rotation speed based on the steering input
         float rotationSpeed = Mathf.Clamp(maxWheelRotationSpeed * steeringInput,-maxWheelAngle,maxWheelAngle);
-
         // Rotate the wheel towards the desired rotation
         wheelObject.transform.Rotate(Vector3.up * rotationSpeed);
     }
