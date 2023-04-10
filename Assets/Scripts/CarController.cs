@@ -1,5 +1,3 @@
-using System;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -21,18 +19,20 @@ public class CarController : MonoBehaviour
     public float topSpeed;
     private Rigidbody _carBodyRb;
     private float _sMoveInput;
-    public GameObject[] tires;
     public float groundDamping;
     public float aeroDamping;
-    public float driftDamping = 0.01f;
-    private float _mAccelerate = 0;
     private InputAction _mBrake;
     private float _speedInput;
     public float numberOfRotations;
     private float _chasisTireDst;
     [SerializeField] private AnimationCurve accelerationCurve;
-    private CustomInput _input = null;
-    private Vector2 moveVector = Vector2.zero;
+    private CustomInput _input;
+    private Vector2 _moveVector = Vector2.zero;
+    public Material tireMaterial;
+    public Mesh fRightMesh;
+    public Mesh fLeftMesh;
+    public Mesh rRightMesh;
+    public Mesh rLeftMesh;
 
     // Start is called before the first frame update
     void Start()
@@ -43,8 +43,11 @@ public class CarController : MonoBehaviour
         CreateObject(rLeft,carBody,"rearLeftPos");
         CreateObject(rRight,carBody,"rearRightPos");
         DisableCollisionWith(fLeft, fRight, rLeft, rRight, carBody);
-        tires = new[] { fLeft, fRight, rLeft, rRight };
         _chasisTireDst = GetDstChasisTire(carBody, fLeft);
+        CreateChildMesh(fLeft,"frontLeftMesh",fLeftMesh,tireMaterial);
+        CreateChildMesh(fRight,"frontRightMesh",fRightMesh,tireMaterial);
+        CreateChildMesh(rLeft,"rearLeftMesh",rLeftMesh,tireMaterial);
+        CreateChildMesh(rRight,"rearRightMesh",rRightMesh,tireMaterial);
     }
 
     private void Awake()
@@ -72,12 +75,12 @@ public class CarController : MonoBehaviour
 
     private void OnMovementPerformed(InputAction.CallbackContext value)
     {
-        moveVector = value.ReadValue<Vector2>();
+        _moveVector = value.ReadValue<Vector2>();
     }
     
     private void OnMovementCancelled(InputAction.CallbackContext value)
     {
-        moveVector = Vector2.zero;
+        _moveVector = Vector2.zero;
     }
     private void OnAccelerationPerformed(InputAction.CallbackContext value)
     {
@@ -96,7 +99,7 @@ public class CarController : MonoBehaviour
         CarRotation();
         var carRotation = carBody.transform.rotation;
         Debug.Log(_speedInput);
-        _sMoveInput = moveVector.x;
+        _sMoveInput = _moveVector.x;
         rRight.transform.rotation = new Quaternion(carRotation.x, carRotation.y, carRotation.z, carRotation.w);
         rLeft.transform.rotation = new Quaternion(carRotation.x, carRotation.y, carRotation.z, carRotation.w);
         fRight.transform.rotation = new Quaternion(carRotation.x, carRotation.y, carRotation.z, carRotation.w);
@@ -318,5 +321,34 @@ public class CarController : MonoBehaviour
         float rotationSpeed = Mathf.Clamp(maxWheelRotationSpeed * steeringInput,-maxWheelAngle,maxWheelAngle);
         // Rotate the wheel towards the desired rotation
         wheelObject.transform.Rotate(Vector3.up * rotationSpeed);
+    }
+
+    private static void CreateChildMesh(GameObject parent, string meshName,Mesh tireMesh ,Material material)
+    {
+        // Create a new GameObject.
+        GameObject child = new GameObject
+        {
+            transform =
+            {
+                // Set the parent of the new GameObject to the specified parent.
+                parent = parent.transform,
+                position = parent.transform.position
+            },
+            name = meshName
+        };
+
+        // Add a MeshFilter component to the new GameObject.
+        MeshFilter meshFilter = child.AddComponent<MeshFilter>();
+
+        // Set the mesh of the MeshFilter component to the specified mesh.
+        meshFilter.mesh = tireMesh;
+
+        // Add a MeshRenderer component to the new GameObject.
+        MeshRenderer meshRenderer = child.AddComponent<MeshRenderer>();
+
+        // Set the material of the MeshRenderer component to the specified material.
+        meshRenderer.material = material;
+
+        // Return the new GameObject.
     }
 }
