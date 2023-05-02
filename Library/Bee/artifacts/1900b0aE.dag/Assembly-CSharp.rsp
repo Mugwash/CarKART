@@ -354,6 +354,7 @@
 "Assets/Input/CustomInput.cs"
 "Assets/Scripts/CameraFollow.cs"
 "Assets/Scripts/CarController.cs"
+"Assets/Scripts/SimpleCarController.cs"
 -langversion:9.0
 
 /deterministic
