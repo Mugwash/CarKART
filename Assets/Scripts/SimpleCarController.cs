@@ -49,13 +49,19 @@ public class SimpleCarController : MonoBehaviour {
         float steering = maxSteeringAngle * Input.GetAxis("Horizontal");
      
         foreach (AxleInfo axleInfo in axleInfos) {
+            setSideFrictionExtremiumValues(axleInfo.leftWheel, 4f , 20);
+            setSideFrictionExtremiumValues(axleInfo.rightWheel, 4f , 20);
             if (axleInfo.steering) {
                 axleInfo.leftWheel.steerAngle = steering;
                 axleInfo.rightWheel.steerAngle = steering;
             }
             if (axleInfo.motor) {
-                axleInfo.leftWheel.motorTorque = motor;
-                axleInfo.rightWheel.motorTorque = motor;
+                axleInfo.leftWheel.motorTorque= axleInfo.rightWheel.motorTorque  = motor;
+            }
+            else
+            {
+                axleInfo.leftWheel.motorTorque = 0;
+                axleInfo.rightWheel.motorTorque = 0;
             }
             ApplyLocalPositionToVisuals(axleInfo.leftWheel);
             ApplyLocalPositionToVisuals(axleInfo.rightWheel);
@@ -81,5 +87,19 @@ public class SimpleCarController : MonoBehaviour {
     {
         float velocityInDirection = Vector3.Dot(obj.GetComponent<Rigidbody>().velocity, carBody.transform.forward);
         return velocityInDirection;
+    }
+    
+    private Collider GetCollider(GameObject obj)
+    {
+        Collider collider = obj.GetComponent<Collider>();
+        return collider;
+    }
+    
+    private void setSideFrictionExtremiumValues(WheelCollider wheelCollider, float extremumSlip, float extremumValue)
+    {
+        WheelFrictionCurve frictionCurve = wheelCollider.sidewaysFriction;
+        frictionCurve.extremumSlip = extremumSlip;
+        frictionCurve.extremumValue = extremumValue;
+        wheelCollider.sidewaysFriction = frictionCurve;
     }
 }
