@@ -67,7 +67,7 @@ public class SimpleCarController : MonoBehaviour {
             ApplyLocalPositionToVisuals(axleInfo.rightWheel);
         }
 
-        Debug.Log(GetVelocity(this.gameObject));
+        Debug.Log(GetMilesPerHour(this.gameObject));
     }
     
     
@@ -87,6 +87,13 @@ public class SimpleCarController : MonoBehaviour {
     {
         float velocityInDirection = Vector3.Dot(obj.GetComponent<Rigidbody>().velocity, carBody.transform.forward);
         return velocityInDirection;
+    }
+    
+    private float GetMilesPerHour(GameObject obj)
+    {
+        float velocityInDirection = GetVelocity(obj);
+        float milesPerHour = velocityInDirection * 2.23693629f;
+        return milesPerHour;
     }
     
     private Collider GetCollider(GameObject obj)
