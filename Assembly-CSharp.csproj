@@ -42,6 +42,7 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets\Input\CustomInput.cs" />
+     <Compile Include="Assets\BardCameraFollow.cs" />
      <Compile Include="Assets\Scripts\CarController.cs" />
      <Compile Include="Assets\Scripts\SimpleCarController.cs" />
      <Compile Include="Assets\Scripts\CameraFollow.cs" />

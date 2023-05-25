@@ -1,76 +1,128 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 [System.Serializable]
-
 public class AxleInfo {
-    public WheelCollider leftWheel;
-    public WheelCollider rightWheel;
+    [HideInInspector] public WheelCollider _leftWheel;
+    [HideInInspector] public WheelCollider _rightWheel;
     public bool motor;
     public bool steering;
 }
-     
-public class SimpleCarController : MonoBehaviour {
-    public List<AxleInfo> axleInfos; 
+
+[System.Serializable]
+public class WheelObject
+{
+    public GameObject leftWheel;
+    public GameObject rightWheel;
+}
+
+[System.Serializable]
+public class WheelValues
+{
+    //change variables in this class to public to see them in the inspector
+    public float mass;
+    public float wheelDampningRate;
+    public float suspensionDistance;
+    public float forceAppPointDistance;
+    public float wheelColliderCenterY;
+    public float spring;
+    public float damper;
+    public float targetPosition;
+    public float fExtremumSlip;
+    public float fExtremumValue;
+    public float fAsymptoteSlip;
+    public float fAsymptoteValue;
+    public float fStiffness;
+    public float sExtremumSlip;
+    public float sExtremumValue;
+    public float sAsymptoteSlip;
+    public float sAsymptoteValue;
+    public float sStiffness;
+}
+
+public class SimpleCarController : MonoBehaviour
+{
+    
+    public List<AxleInfo> axleInfos;
+    public List<WheelObject> wheelObjects;
+    public WheelValues wheelValues;
     public float maxMotorTorque;
     public float maxSteeringAngle;
     public GameObject carBody;
+    public float maxSpeedMph;
+    public float maxReverseSpeed;
+
+
     public void Start()
     {
         Rigidbody rb = GetComponent<Rigidbody>();
         rb.centerOfMass = carBody.transform.position;
-        foreach (AxleInfo axleInfo in axleInfos) {
-            DisableCollisionWith(axleInfo.leftWheel.gameObject, axleInfo.rightWheel.gameObject, carBody);
+        for(int i = 0; i < axleInfos.Count; i++)
+        {
+            axleInfos[i]._leftWheel = wheelObjects[i].leftWheel.AddComponent<WheelCollider>();
+            axleInfos[i]._rightWheel = wheelObjects[i].rightWheel.AddComponent<WheelCollider>();
+            SetWheelColliderValues(axleInfos[i]._leftWheel,wheelValues,GetMeshRadius(wheelObjects[i].leftWheel));
+            SetWheelColliderValues(axleInfos[i]._rightWheel,wheelValues,GetMeshRadius(wheelObjects[i].rightWheel));
+            CreateChildObject(wheelObjects[i].leftWheel);
+            CreateChildObject(wheelObjects[i].rightWheel);
         }
-        
-    }
+        foreach (AxleInfo axleInfo in axleInfos)
+        {
+            DisableCollisionWith(axleInfo._leftWheel.gameObject, axleInfo._rightWheel.gameObject, carBody);
+            
+        }
 
+    }
     // finds the corresponding visual wheel
     // correctly applies the transform
-    public void ApplyLocalPositionToVisuals(WheelCollider collider)
+    public void ApplyLocalPositionToVisuals(WheelCollider collider1)
     {
-        if (collider.transform.childCount == 0) {
+        if (collider1.transform.childCount == 0)
+        {
             return;
         }
-     
-        Transform visualWheel = collider.transform.GetChild(0);
-     
-        Vector3 position;
-        Quaternion rotation;
-        collider.GetWorldPose(out position, out rotation);
-     
-        visualWheel.transform.position = position;
-        visualWheel.transform.rotation = rotation;
+
+        Transform visualWheel = collider1.transform.GetChild(0);
+
+        collider1.GetWorldPose(out var position, out var rotation);
+
+        var transform1 = visualWheel.transform;
+        transform1.position = position;
+        transform1.rotation = rotation;
     }
-     
+
     public void FixedUpdate()
     {
         float motor = maxMotorTorque * Input.GetAxis("Vertical");
         float steering = maxSteeringAngle * Input.GetAxis("Horizontal");
-     
-        foreach (AxleInfo axleInfo in axleInfos) {
-            setSideFrictionExtremiumValues(axleInfo.leftWheel, 4f , 20);
-            setSideFrictionExtremiumValues(axleInfo.rightWheel, 4f , 20);
-            if (axleInfo.steering) {
-                axleInfo.leftWheel.steerAngle = steering;
-                axleInfo.rightWheel.steerAngle = steering;
+
+        foreach (AxleInfo axleInfo in axleInfos)
+        {
+            if (axleInfo.steering)
+            {
+                axleInfo._leftWheel.steerAngle = steering;
+                axleInfo._rightWheel.steerAngle = steering;
             }
-            if (axleInfo.motor) {
-                axleInfo.leftWheel.motorTorque= axleInfo.rightWheel.motorTorque  = motor;
+
+            if (axleInfo.motor)
+            {
+                axleInfo._leftWheel.motorTorque = axleInfo._rightWheel.motorTorque = motor;
             }
             else
             {
-                axleInfo.leftWheel.motorTorque = 0;
-                axleInfo.rightWheel.motorTorque = 0;
+                axleInfo._leftWheel.motorTorque = 0;
+                axleInfo._rightWheel.motorTorque = 0;
             }
-            ApplyLocalPositionToVisuals(axleInfo.leftWheel);
-            ApplyLocalPositionToVisuals(axleInfo.rightWheel);
+            ApplyMaxSpeeds(maxSpeedMph,maxReverseSpeed);
+            ApplyLocalPositionToVisuals(axleInfo._leftWheel);
+            ApplyLocalPositionToVisuals(axleInfo._rightWheel);
         }
 
-        Debug.Log(GetMilesPerHour(this.gameObject));
+        //Debug.Log(GetMilesPerHour(this.gameObject));
     }
-    
-    
+
+
     void DisableCollisionWith(GameObject obj1, GameObject obj2,
         GameObject ignoreCollider)
     {
@@ -81,32 +133,82 @@ public class SimpleCarController : MonoBehaviour {
             Physics.IgnoreCollision(obj2.GetComponent<Collider>(), collider2);
         }
     }
-    
-    
+
+
     private float GetVelocity(GameObject obj)
     {
         float velocityInDirection = Vector3.Dot(obj.GetComponent<Rigidbody>().velocity, carBody.transform.forward);
         return velocityInDirection;
     }
-    
+
     private float GetMilesPerHour(GameObject obj)
     {
         float velocityInDirection = GetVelocity(obj);
         float milesPerHour = velocityInDirection * 2.23693629f;
         return milesPerHour;
     }
-    
+
     private Collider GetCollider(GameObject obj)
     {
-        Collider collider = obj.GetComponent<Collider>();
-        return collider;
+        Collider collider1 = obj.GetComponent<Collider>();
+        return collider1;
+    }
+
+    private void SetWheelColliderValues(WheelCollider wheelCollider,WheelValues wheelValue,float wheelRadius)
+    {
+        wheelCollider.mass = wheelValue.mass;
+        wheelCollider.radius = wheelRadius;
+        wheelCollider.wheelDampingRate = wheelValue.wheelDampningRate;
+        wheelCollider.suspensionDistance = wheelValue.suspensionDistance;
+        wheelCollider.forceAppPointDistance = wheelValue.forceAppPointDistance;
+        wheelCollider.center = new Vector3(0, wheelValue.wheelColliderCenterY, 0);
+        JointSpring wheelColliderSuspensionSpring = wheelCollider.suspensionSpring;
+        wheelColliderSuspensionSpring.spring = wheelValue.spring;
+        wheelColliderSuspensionSpring.damper = wheelValue.damper;
+        wheelColliderSuspensionSpring.targetPosition = wheelValue.targetPosition;
+        WheelFrictionCurve forwardFriction = wheelCollider.forwardFriction;
+        forwardFriction.extremumSlip = wheelValue.fExtremumSlip;
+        forwardFriction.extremumValue = wheelValue.fExtremumValue;
+        forwardFriction.asymptoteSlip = wheelValue.fAsymptoteSlip;
+        forwardFriction.asymptoteValue = wheelValue.fAsymptoteValue;
+        forwardFriction.stiffness = wheelValue.fStiffness;
+        WheelFrictionCurve sidewaysFriction = wheelCollider.sidewaysFriction;
+        sidewaysFriction.extremumSlip = wheelValue.sExtremumSlip;
+        sidewaysFriction.extremumValue = wheelValue.sExtremumValue;
+        sidewaysFriction.asymptoteSlip = wheelValue.sAsymptoteSlip;
+        sidewaysFriction.asymptoteValue = wheelValue.sAsymptoteValue;
+        sidewaysFriction.stiffness = wheelValue.sStiffness;
     }
     
-    private void setSideFrictionExtremiumValues(WheelCollider wheelCollider, float extremumSlip, float extremumValue)
+    private void ApplyMaxSpeeds(float topSpeedMph , float topReverseSpeedMph)
     {
-        WheelFrictionCurve frictionCurve = wheelCollider.sidewaysFriction;
-        frictionCurve.extremumSlip = extremumSlip;
-        frictionCurve.extremumValue = extremumValue;
-        wheelCollider.sidewaysFriction = frictionCurve;
+        if (GetMilesPerHour(this.gameObject) >= (topSpeedMph) || GetMilesPerHour(this.gameObject) <= topReverseSpeedMph)
+        {
+            this.gameObject.GetComponent<Rigidbody>().drag = 1;
+        }
+        else
+        {
+            this.gameObject.GetComponent<Rigidbody>().drag = 0;
+        }
+    }
+    public float GetMeshRadius(GameObject obj)
+    {
+        Mesh mesh = obj.GetComponent<MeshFilter>().mesh;
+        float radius = mesh.bounds.size.y/2;
+        return radius;
+    }
+    
+    // create a child object on the object passed in, and then move the meshfilter and meshrenderer to the child object
+    public void CreateChildObject(GameObject obj)
+    {
+        GameObject childObject = new GameObject();
+        childObject.transform.parent = obj.transform;
+        childObject.name = obj.name + "Mesh";
+        childObject.AddComponent<MeshFilter>();
+        childObject.AddComponent<MeshRenderer>();
+        childObject.GetComponent<MeshFilter>().mesh = obj.GetComponent<MeshFilter>().mesh;
+        childObject.GetComponent<MeshRenderer>().material = obj.GetComponent<MeshRenderer>().material;
+        obj.GetComponent<MeshFilter>().mesh = null;
+        obj.GetComponent<MeshRenderer>().material = null;
     }
 }
