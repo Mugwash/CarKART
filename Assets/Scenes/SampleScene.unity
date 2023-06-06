@@ -825,12 +825,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
+      propertyPath: brakeForce
+      value: 1000000
+      objectReference: {fileID: 0}
+    - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: TopSpeedMPH
       value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: maxSpeedMph
-      value: 80
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: extremiumSlip
@@ -846,11 +850,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: maxReverseSpeed
-      value: -15
+      value: -10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
+      propertyPath: maxSteeringAngle
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.mass
-      value: 100
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.damper
@@ -861,12 +869,16 @@ PrefabInstance:
       value: 35000
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
+      propertyPath: brakeTorqueMultiplier
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.fStiffness
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.sStiffness
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.fExtremumSlip
@@ -874,7 +886,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.sExtremumSlip
-      value: 0.2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.fAsymptoteSlip
@@ -934,7 +946,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4266672370257060710, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: m_Mass
-      value: 500
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 4266672370257060710, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: m_AngularDrag

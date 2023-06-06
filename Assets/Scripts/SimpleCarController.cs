@@ -49,14 +49,17 @@ public class SimpleCarController : MonoBehaviour
     public WheelValues wheelValues;
     public float maxMotorTorque;
     public float maxSteeringAngle;
+    public float brakeForce;
     public GameObject carBody;
     public float maxSpeedMph;
     public float maxReverseSpeed;
+    private Rigidbody rb;
+    private bool isBraking;
 
 
     public void Start()
     {
-        Rigidbody rb = GetComponent<Rigidbody>();
+        rb = GetComponent<Rigidbody>();
         rb.centerOfMass = carBody.transform.position;
         for(int i = 0; i < axleInfos.Count; i++)
         {
@@ -94,9 +97,19 @@ public class SimpleCarController : MonoBehaviour
 
     public void FixedUpdate()
     {
-        float motor = maxMotorTorque * Input.GetAxis("Vertical");
-        float steering = maxSteeringAngle * Input.GetAxis("Horizontal");
-
+        float motor = maxMotorTorque * Input.GetAxis ("Vertical");
+        rb.AddForce(transform.forward * motor);
+        float steering = maxSteeringAngle * Input.GetAxis ("Horizontal");
+        
+        if(GetMilesPerHour(this.gameObject)>0 && Input.GetAxis("Vertical") < 0)
+        {
+            isBraking = true;
+        }
+        else
+        {
+            isBraking = false;
+        }
+        ApplyMaxSpeeds(maxSpeedMph,maxReverseSpeed);
         foreach (AxleInfo axleInfo in axleInfos)
         {
             if (axleInfo.steering)
@@ -104,25 +117,33 @@ public class SimpleCarController : MonoBehaviour
                 axleInfo._leftWheel.steerAngle = steering;
                 axleInfo._rightWheel.steerAngle = steering;
             }
-
             if (axleInfo.motor)
             {
-                axleInfo._leftWheel.motorTorque = axleInfo._rightWheel.motorTorque = motor;
+                axleInfo._leftWheel.motorTorque = motor;
+                axleInfo._rightWheel.motorTorque = motor;
             }
             else
             {
                 axleInfo._leftWheel.motorTorque = 0;
                 axleInfo._rightWheel.motorTorque = 0;
             }
-            ApplyMaxSpeeds(maxSpeedMph,maxReverseSpeed);
+
+            if (isBraking)
+            {
+                axleInfo._leftWheel.brakeTorque = brakeForce;
+                axleInfo._rightWheel.brakeTorque = brakeForce;
+            }
+            else
+            {
+                axleInfo._leftWheel.brakeTorque = 0;
+                axleInfo._rightWheel.brakeTorque = 0;
+            }
             ApplyLocalPositionToVisuals(axleInfo._leftWheel);
             ApplyLocalPositionToVisuals(axleInfo._rightWheel);
         }
 
-        //Debug.Log(GetMilesPerHour(this.gameObject));
+        Debug.Log(GetMilesPerHour(this.gameObject));
     }
-
-
     void DisableCollisionWith(GameObject obj1, GameObject obj2,
         GameObject ignoreCollider)
     {
