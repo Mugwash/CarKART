@@ -53,6 +53,7 @@ public class SimpleCarController : MonoBehaviour
     public GameObject carBody;
     public float maxSpeedMph;
     public float maxReverseSpeed;
+
     private Rigidbody rb;
     private bool isBraking;
 
@@ -60,7 +61,7 @@ public class SimpleCarController : MonoBehaviour
     public void Start()
     {
         rb = GetComponent<Rigidbody>();
-        rb.centerOfMass = carBody.transform.position;
+        rb.centerOfMass = new Vector3(carBody.transform.localPosition.x,carBody.GetComponent<Collider>().bounds.min.y,carBody.transform.localPosition.z);
         for(int i = 0; i < axleInfos.Count; i++)
         {
             axleInfos[i]._leftWheel = wheelObjects[i].leftWheel.AddComponent<WheelCollider>();
@@ -97,7 +98,17 @@ public class SimpleCarController : MonoBehaviour
 
     public void FixedUpdate()
     {
-        float motor = maxMotorTorque * Input.GetAxis ("Vertical");
+        addDownforce(GetMilesPerHour(this.gameObject));
+        float motor;
+        if (Input.GetAxis("Vertical") > 0)
+        {
+            motor = maxMotorTorque * Input.GetAxis ("Vertical");
+        }
+        else
+        {
+            motor = 0;
+        }
+        
         rb.AddForce(transform.forward * motor);
         float steering = maxSteeringAngle * Input.GetAxis ("Horizontal");
         
@@ -141,8 +152,6 @@ public class SimpleCarController : MonoBehaviour
             ApplyLocalPositionToVisuals(axleInfo._leftWheel);
             ApplyLocalPositionToVisuals(axleInfo._rightWheel);
         }
-
-        Debug.Log(GetMilesPerHour(this.gameObject));
     }
     void DisableCollisionWith(GameObject obj1, GameObject obj2,
         GameObject ignoreCollider)
@@ -175,7 +184,7 @@ public class SimpleCarController : MonoBehaviour
         return collider1;
     }
 
-    private void SetWheelColliderValues(WheelCollider wheelCollider,WheelValues wheelValue,float wheelRadius)
+    private static void SetWheelColliderValues(WheelCollider wheelCollider,WheelValues wheelValue,float wheelRadius)
     {
         wheelCollider.mass = wheelValue.mass;
         wheelCollider.radius = wheelRadius;
@@ -183,22 +192,28 @@ public class SimpleCarController : MonoBehaviour
         wheelCollider.suspensionDistance = wheelValue.suspensionDistance;
         wheelCollider.forceAppPointDistance = wheelValue.forceAppPointDistance;
         wheelCollider.center = new Vector3(0, wheelValue.wheelColliderCenterY, 0);
-        JointSpring wheelColliderSuspensionSpring = wheelCollider.suspensionSpring;
+        
+        JointSpring wheelColliderSuspensionSpring = default;
         wheelColliderSuspensionSpring.spring = wheelValue.spring;
         wheelColliderSuspensionSpring.damper = wheelValue.damper;
         wheelColliderSuspensionSpring.targetPosition = wheelValue.targetPosition;
-        WheelFrictionCurve forwardFriction = wheelCollider.forwardFriction;
+        wheelCollider.suspensionSpring = wheelColliderSuspensionSpring;
+        
+        WheelFrictionCurve forwardFriction = default;
         forwardFriction.extremumSlip = wheelValue.fExtremumSlip;
         forwardFriction.extremumValue = wheelValue.fExtremumValue;
         forwardFriction.asymptoteSlip = wheelValue.fAsymptoteSlip;
         forwardFriction.asymptoteValue = wheelValue.fAsymptoteValue;
         forwardFriction.stiffness = wheelValue.fStiffness;
-        WheelFrictionCurve sidewaysFriction = wheelCollider.sidewaysFriction;
+        wheelCollider.forwardFriction = forwardFriction;
+        
+        WheelFrictionCurve sidewaysFriction = default; 
         sidewaysFriction.extremumSlip = wheelValue.sExtremumSlip;
         sidewaysFriction.extremumValue = wheelValue.sExtremumValue;
         sidewaysFriction.asymptoteSlip = wheelValue.sAsymptoteSlip;
         sidewaysFriction.asymptoteValue = wheelValue.sAsymptoteValue;
         sidewaysFriction.stiffness = wheelValue.sStiffness;
+        wheelCollider.sidewaysFriction = sidewaysFriction;
     }
     
     private void ApplyMaxSpeeds(float topSpeedMph , float topReverseSpeedMph)
@@ -231,5 +246,10 @@ public class SimpleCarController : MonoBehaviour
         childObject.GetComponent<MeshRenderer>().material = obj.GetComponent<MeshRenderer>().material;
         obj.GetComponent<MeshFilter>().mesh = null;
         obj.GetComponent<MeshRenderer>().material = null;
+    }
+
+    private void addDownforce(float speed)
+    {
+        rb.AddForce(-transform.up * speed);
     }
 }

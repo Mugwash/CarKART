@@ -826,7 +826,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: brakeForce
-      value: 1000000
+      value: 10000
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: TopSpeedMPH
@@ -854,11 +854,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: maxSteeringAngle
-      value: 50
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.mass
-      value: 50
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.damper
@@ -878,31 +878,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.sStiffness
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.fExtremumSlip
-      value: 0.4
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.sExtremumSlip
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.fAsymptoteSlip
-      value: 0.8
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.fExtremumValue
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.sAsymptoteSlip
-      value: 0.5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.sExtremumValue
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.targetPosition
@@ -910,11 +910,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.fAsymptoteValue
-      value: 0.5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: wheelValues.sAsymptoteValue
-      value: 0.75
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3806215795498030661, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: axleInfos.Array.data[0].motor
@@ -946,7 +946,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4266672370257060710, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: m_Mass
-      value: 1000
+      value: 400
       objectReference: {fileID: 0}
     - target: {fileID: 4266672370257060710, guid: c4cad50aa03bbca42938fe318344950b, type: 3}
       propertyPath: m_AngularDrag
@@ -1802,8 +1802,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 3.75, z: -10.42}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 3, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
