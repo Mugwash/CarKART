@@ -161,13 +161,31 @@ MonoBehaviour:
     rightWheel: {fileID: 3982450954767655787}
   - leftWheel: {fileID: 5738022010395168443}
     rightWheel: {fileID: 391397315203931578}
+  wheelValues:
+    mass: 50
+    wheelDampningRate: 0
+    suspensionDistance: 0
+    forceAppPointDistance: 0
+    wheelColliderCenterY: 0
+    spring: 0
+    damper: 0
+    targetPosition: 0
+    fExtremumSlip: 0
+    fExtremumValue: 0
+    fAsymptoteSlip: 0
+    fAsymptoteValue: 0
+    fStiffness: 0
+    sExtremumSlip: 0
+    sExtremumValue: 0
+    sAsymptoteSlip: 0
+    sAsymptoteValue: 0
+    sStiffness: 0
   maxMotorTorque: 400
   maxSteeringAngle: 30
+  brakeForce: 0
   carBody: {fileID: 1532183532590448871}
   maxSpeedMph: 0
   maxReverseSpeed: 0
-  extremiumSlip: 0
-  extremiumValue: 0
 --- !u!1 &1532183532590448871
 GameObject:
   m_ObjectHideFlags: 0

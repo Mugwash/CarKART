@@ -55,13 +55,13 @@ public class SimpleCarController : MonoBehaviour
     public float maxReverseSpeed;
 
     private Rigidbody rb;
+    private float originalDrag;
     private bool isBraking;
 
 
     public void Start()
     {
         rb = GetComponent<Rigidbody>();
-        rb.centerOfMass = new Vector3(carBody.transform.localPosition.x,carBody.GetComponent<Collider>().bounds.min.y,carBody.transform.localPosition.z);
         for(int i = 0; i < axleInfos.Count; i++)
         {
             axleInfos[i]._leftWheel = wheelObjects[i].leftWheel.AddComponent<WheelCollider>();
@@ -76,7 +76,8 @@ public class SimpleCarController : MonoBehaviour
             DisableCollisionWith(axleInfo._leftWheel.gameObject, axleInfo._rightWheel.gameObject, carBody);
             
         }
-
+        originalDrag = rb.drag;
+        rb.centerOfMass = new Vector3(carBody.transform.localPosition.x,carBody.GetComponent<Collider>().bounds.min.y/2f,carBody.transform.localPosition.z);
     }
     // finds the corresponding visual wheel
     // correctly applies the transform
@@ -224,7 +225,7 @@ public class SimpleCarController : MonoBehaviour
         }
         else
         {
-            this.gameObject.GetComponent<Rigidbody>().drag = 0;
+            this.gameObject.GetComponent<Rigidbody>().drag = originalDrag;
         }
     }
     public float GetMeshRadius(GameObject obj)
