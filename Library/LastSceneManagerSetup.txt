@@ -1,5 +1,3 @@
-sceneSetups:
-- path: Assets/CartoonTracksPack1/Track1/Demo Scenes/complete_track_demo.unity
-  isLoaded: 1
-  isActive: 1
-  isSubScene: 0
+version https://git-lfs.github.com/spec/v1
+oid sha256:d0d854cd9055ff849733be6a8ff7ae1358f2153600cae534cc0fec4804f4a130
+size 136
