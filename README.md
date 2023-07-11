@@ -1,3 +1,3 @@
 # CarKART
-Personal Project to create simple but fun game
+Unity C# multiplayer racing game
 https://www.youtube.com/watch?v=RJIIF_wmPVI
